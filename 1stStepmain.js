@@ -16,25 +16,33 @@ function countRoles() {
   return _.countBy(Object.values(Game.creeps), c => c.memory.role);
 }
 
-/** Current economy: 4 harvesters, 2 upgraders, up to 2 builders */
+/** Current economy: 4 harvesters, 2 upgraders, up to 1 builders */
 function desiredCounts(room) {
   const buildSites = room.find(FIND_CONSTRUCTION_SITES).length;
-  const targets = { harvester: 2, upgrader: 1, builder: 0 };
-  if (buildSites) targets.builder = 4;       // only if something to build
-  if (room.controller && room.controller.level <= 3) targets.upgrader = 3; // early push
+  const targets = { harvester: 4, upgrader: 2, builder: 0 };
+  if (buildSites) targets.builder = 2;       // only if something to build
+  if (room.controller && room.controller.level <= 7) targets.upgrader = 2; // early push
   return targets;
 }
 
-/** Your faster worker: [WORK, CARRY, MOVE, MOVE] = 250 per block */
+/** move:          50 energy
+    work:          100 energy
+    attack:        80 energy
+    carry:         100 energy
+    heal:          250 energy
+    range_attack:  150 energy
+    tough:         10 energy
+    claim:         600 energy
+    */
 function bestWorkerBody(energy) {
   const body = [];
-  const block = [WORK, CARRY, MOVE];
-  const costPer = 250;
+  const block = [WORK, WORK, CARRY, MOVE, MOVE, MOVE];
+  const costPer = 300;
   while (energy >= costPer && body.length + block.length <= 50) {
     body.push(...block);
     energy -= costPer;
   }
-  return body.length ? body : [WORK, CARRY, MOVE, MOVE];
+  return body.length ? body : [WORK, WORK, CARRY, MOVE, MOVE, MOVE];
 }
 
 /** Evenly assign creeps to sources for a given role */
